@@ -1,0 +1,85 @@
+A Memory Based Iterative Local Search Topic Crawler Algo-rithm for Tunnel Crossing
+==================================================================================
+NOTE:
+=====
+The resorces correspond to crawler.py.
+The author lacks access to English web pages due to policy reasons, and the default semantic language of the code is Chinese, yet the code itself is also applicable to English web pages, just simply replace the function in doc2vec_gensim.py and train_doc2vec_model.py, which belong to Semantic Analysis Module in this programme.
+
+
+
+How the code works:
+===================
+1. Take inputs from the user (detailed in readme.txt)
+2. Obtain start pages
+3. Enqueue start pages, come to work without acceptance calculate network(Rand choice stage)
+4. Get a url from queue to be paresd in a Roulette way
+5. Parse the link, extract the main content and subpages' content, enqueue them into Data
+6. Run local search from Data, obtain eight types of information and score them, enqueue those score into Memory
+7. Calculate strategy acceptance scores in Memory when conditions meet
+8. Repeat steps 4 to 7 till we have crawled the required number of pages in this stage(Default 10% of the total workload)
+9. Using Acceptance Network to calculate the Strategy applicable to last web page
+10. Select a url based on Strategy and subpages' content
+11. Repeat steps 4 to 7
+12. Partial fit Acceptance Calculation Network when conditions meet
+13. Repeat steps 9 to 12 till we have crawled the required number of pages
+14. Save data and create log
+
+
+Main Data Structures used:
+==========================
+1. Priority Queue: to store the links to be parsed in rand choice stage
+2. Past Queue: to store the links has been parsed
+3. Data: to store the raw data from parsed web pages
+4. Memory: to store the score of 10 informations(8 inputs and 2 outputs)
+
+
+Main Classes:
+=============
+PriorityQueue: for the priority queue
+PastQueue: for the Past Queue
+Parsed_data: for the Data
+Memory: for the Memory
+strategy_selection: for the rules for selecting behavior based on scores
+
+Main Functions:
+===============
+1. pre_validate_url(): checks if a link contains certain words (javascript, cgi ...) and/or has invalid file types (.mp4, .avi, .pdf ...) before it can be enqueued
+1. validate_url(): checks if a link can be crawled, by checking the status code, robots.txt file, and MIME type, upon dequeueing it
+2. visit_url(): to crawl the page and return a set of pre-validiated normalized links in the page and the page's HTML text
+3. local_saerch(): returns the score of 8 informations using gensim and former memory
+4. Feature_extraction(): Calculate the acceptance score of strategies of memory based on rules
+5. move(): Select a url based on Strategy and subpages' content
+6. get_harvest_rate(): computes the harvest rate
+7. create_log(): creates the log file
+
+Packages Used:
+==============
+requests
+bs4 (for BeautifulSoup)
+urllib
+selenium(Requires Firefox browser)
+datetime
+url_normalize
+time
+string
+collections
+gensim
+sklearn
+jieba
+
+Known Bugs:
+===========
+1. Speed: The crawler isn't very fast; It parses 1000 links in about 30 minutes
+
+About model:
+============
+There are 2 models in this programme, one is for semantic analysis called model_dm, another is for calculating acceptance score of strategies called model_mlp
+1. model_dm:
+   ---------
+   gensim (mostly gensim's interface for Doc2vec) was used while computing the relevance between topic and webpage's content. model_dm is a model of gensim trained by using a corpus. The official manual address of gensim is https://radimrehurek.com/gensim/models/doc2vec.html
+2. model_mlp:
+   ----------
+   sklearn was used for regressor, which is calculating acceptance score of strategies. model_mpl is a model of sklearn trained by using crawler's memory and there are 2 methods to train, one fit and partial fit respectively.The official manual address of sklearn is https://scikit-learn.org/dev/user_guide.html
+
+
+
